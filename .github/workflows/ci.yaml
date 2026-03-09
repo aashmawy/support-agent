@@ -120,4 +120,4 @@ jobs:
       - name: Garak smoke
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: python -m garak --target_type openai --target_name gpt-4o-mini --probes promptinject --model_type chat
+        run: python -m garak --model_type openai --model_name gpt-4o-mini --probes promptinject

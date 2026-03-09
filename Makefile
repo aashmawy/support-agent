@@ -30,7 +30,7 @@ eval-promptfoo:
 	npx promptfoo@latest eval -c evals/promptfoo.yaml
 
 eval-garak:
-	python -m garak --target_type openai --target_name gpt-4o-mini --probes promptinject --model_type chat 2>/dev/null || echo "Run garak with OPENAI_API_KEY set; see README and blog."
+	python -m garak --model_type openai --model_name gpt-4o-mini --probes promptinject 2>/dev/null || echo "Run garak with OPENAI_API_KEY set; see README and blog."
 
 trajectly-record:
 	python -m trajectly record trajectly/specs/*.agent.yaml --project-root .

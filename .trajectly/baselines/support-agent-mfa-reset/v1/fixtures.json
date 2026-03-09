@@ -66,7 +66,7 @@
         "error": null,
         "output": {
           "account_id": "ACME-ENT-09",
-          "audit_id": 8,
+          "audit_id": 4,
           "event_type": "mfa_reset",
           "status": "logged"
         }
@@ -74,7 +74,7 @@
     },
     {
       "error": null,
-      "input_hash": "33d02b2ed8875fc48ffe6cc0a021dcda762d3774eebd02e388e03f502a4c1e7b",
+      "input_hash": "ce3069f8312a2bc8719034af9bb7fdc15f6a9ed4c8284cad352ad9088d426ccb",
       "input_payload": {
         "args": [],
         "kwargs": {
@@ -85,7 +85,7 @@
           },
           "audit_result": {
             "account_id": "ACME-ENT-09",
-            "audit_id": 8,
+            "audit_id": 4,
             "event_type": "mfa_reset",
             "status": "logged"
           },
@@ -101,8 +101,8 @@
       "name": "openai:gpt-4o-mini",
       "output_payload": {
         "error": null,
-        "response": "Your request to reset the Multi-Factor Authentication (MFA) for the admin on account ACME-ENT-09 has been submitted. Currently, it is pending human approval, as MFA resets for enterprise accounts require additional verification. An audit event has also been logged for this action. We will keep you updated on the status of the approval. If you have any further questions, feel free to ask!",
-        "result": "Your request to reset the Multi-Factor Authentication (MFA) for the admin on account ACME-ENT-09 has been submitted. Currently, it is pending human approval, as MFA resets for enterprise accounts require additional verification. An audit event has also been logged for this action. We will keep you updated on the status of the approval. If you have any further questions, feel free to ask!",
+        "response": "Your request to reset the Multi-Factor Authentication (MFA) for the admin on account ACME-ENT-09 has been submitted. Since this is an enterprise account, the MFA reset requires human approval. The request is currently pending approval. \n\nAdditionally, an audit event has been logged for this action. We will keep you updated on the status of the approval. If you have any further questions, feel free to reach out!",
+        "result": "Your request to reset the Multi-Factor Authentication (MFA) for the admin on account ACME-ENT-09 has been submitted. Since this is an enterprise account, the MFA reset requires human approval. The request is currently pending approval. \n\nAdditionally, an audit event has been logged for this action. We will keep you updated on the status of the approval. If you have any further questions, feel free to reach out!",
         "usage": {}
       }
     }

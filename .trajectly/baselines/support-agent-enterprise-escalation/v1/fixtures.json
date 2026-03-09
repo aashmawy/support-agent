@@ -39,7 +39,7 @@
         "error": null,
         "output": {
           "account_id": "TICK-2041",
-          "audit_id": 7,
+          "audit_id": 3,
           "event_type": "escalation",
           "status": "logged"
         }
@@ -47,13 +47,13 @@
     },
     {
       "error": null,
-      "input_hash": "a2a646b403ac288969b855a52ddbd087b82975a51d8236eded4aa62d9292fab2",
+      "input_hash": "3631e6bffb1b4afdd581977068d716e4595978713847fb7034ff5a28d5ac780c",
       "input_payload": {
         "args": [],
         "kwargs": {
           "audit_result": {
             "account_id": "TICK-2041",
-            "audit_id": 7,
+            "audit_id": 3,
             "event_type": "escalation",
             "status": "logged"
           },
@@ -68,8 +68,8 @@
       "name": "openai:gpt-4o-mini",
       "output_payload": {
         "error": null,
-        "response": "Your ticket TICK-2041 regarding the billing discrepancy has been successfully escalated. The current status of the ticket is now escalated. If you have any further questions or need additional assistance, feel free to ask!",
-        "result": "Your ticket TICK-2041 regarding the billing discrepancy has been successfully escalated. The current status of the ticket is now escalated. If you have any further questions or need additional assistance, feel free to ask!",
+        "response": "Your ticket TICK-2041 regarding the billing discrepancy has been successfully escalated. The current status is escalated, and we have logged the escalation in our audit system. If you have any further questions or need additional assistance, please let us know!",
+        "result": "Your ticket TICK-2041 regarding the billing discrepancy has been successfully escalated. The current status is escalated, and we have logged the escalation in our audit system. If you have any further questions or need additional assistance, please let us know!",
         "usage": {}
       }
     }

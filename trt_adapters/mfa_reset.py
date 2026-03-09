@@ -78,6 +78,8 @@ def build_app() -> trajectly.App:
 
 
 def main() -> None:
+    from dotenv import load_dotenv
+    load_dotenv()
     from scripts.init_db import main as init_db
     init_db()
     app = build_app()

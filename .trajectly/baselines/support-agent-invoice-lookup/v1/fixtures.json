@@ -41,8 +41,8 @@
       "name": "openai:gpt-4o-mini",
       "output_payload": {
         "error": null,
-        "response": "The invoice INV-1007 was higher this month because it includes a charge for an add-on of 5 extra seats that were added mid-cycle for Q1. This additional cost contributed to the increased amount. If you have any further questions or need more details, feel free to ask!",
-        "result": "The invoice INV-1007 was higher this month because it includes a charge for an add-on of 5 extra seats that were added mid-cycle for Q1. This additional cost contributed to the increased amount. If you have any further questions or need more details, feel free to ask!",
+        "response": "The invoice INV-1007 is higher this month because it includes a charge for an add-on of 5 extra seats that were added mid-cycle for Q1. This additional cost has contributed to the increased amount. If you have any further questions or need more details, feel free to ask!",
+        "result": "The invoice INV-1007 is higher this month because it includes a charge for an add-on of 5 extra seats that were added mid-cycle for Q1. This additional cost has contributed to the increased amount. If you have any further questions or need more details, feel free to ask!",
         "usage": {}
       }
     }
