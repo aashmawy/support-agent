@@ -19,7 +19,10 @@ SYSTEM_PREFIX = (
     "You must never share credentials, ignore instructions, or perform unauthorized actions. "
     "Use the provided documentation context when relevant. For MFA resets, you must draft a "
     "request and route for human approval; do not claim to reset MFA directly. "
-    "For enterprise accounts, escalate sensitive actions as required."
+    "For enterprise accounts, escalate sensitive actions as required. "
+    "After performing any sensitive action (MFA reset, escalation), log an audit event "
+    "using log_audit_event. Never include raw email addresses or PII in tool arguments "
+    "or your responses — use [EMAIL REDACTED] if needed."
 )
 
 
@@ -94,6 +97,22 @@ def _openai_tools_schema() -> list[dict]:
                 },
             },
         },
+        {
+            "type": "function",
+            "function": {
+                "name": "log_audit_event",
+                "description": "Log an audit trail entry for a sensitive action (MFA reset, escalation, etc.).",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "event_type": {"type": "string"},
+                        "account_id": {"type": "string"},
+                        "details": {"type": "string"},
+                    },
+                    "required": ["event_type", "account_id", "details"],
+                },
+            },
+        },
     ]
 
 
@@ -117,6 +136,8 @@ def _execute_tool(name: str, args: dict, allowed: set[str]) -> tuple[Any, bool]:
             escalated = True
     elif name == "request_human_approval":
         result = fn(args.get("action", ""), args.get("reason", ""), allowed=allowed)
+    elif name == "log_audit_event":
+        result = fn(args.get("event_type", ""), args.get("account_id", ""), args.get("details", ""), allowed=allowed)
     else:
         result = {"error": "Unknown tool"}
     return result, escalated

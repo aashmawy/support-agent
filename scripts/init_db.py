@@ -33,14 +33,14 @@ def main():
     conn = sqlite3.connect(DB_PATH)
     conn.executescript(get_schema())
 
-    for table in ("accounts", "subscriptions", "invoices", "tickets"):
+    for table in ("audit_log", "accounts", "subscriptions", "invoices", "tickets"):
         conn.execute(f"DELETE FROM {table}")
 
     accounts = load_json("accounts.json")
     for row in accounts:
         conn.execute(
-            "INSERT OR REPLACE INTO accounts (id, name, tier, is_enterprise) VALUES (?, ?, ?, ?)",
-            (row["id"], row["name"], row["tier"], 1 if row.get("is_enterprise") else 0),
+            "INSERT OR REPLACE INTO accounts (id, name, tier, is_enterprise, contact_email) VALUES (?, ?, ?, ?, ?)",
+            (row["id"], row["name"], row["tier"], 1 if row.get("is_enterprise") else 0, row.get("contact_email")),
         )
 
     subs = load_json("subscriptions.json")

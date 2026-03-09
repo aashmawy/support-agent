@@ -1,6 +1,6 @@
 # Support Agent
 
-A realistic B2B SaaS support operations agent that answers questions from a local documentation corpus, looks up accounts, invoices, subscriptions, and tickets in SQLite, and uses internal tools for actions like invoice lookup, subscription inspection, MFA reset drafts, ticket escalation, and human approval requests. It refuses unsafe or unauthorized actions and escalates sensitive cases. Built with Python, LangChain, the OpenAI API, and deterministic guardrails.
+A realistic B2B SaaS support operations agent that answers questions from a local documentation corpus, looks up accounts, invoices, subscriptions, and tickets in SQLite, and uses internal tools for actions like invoice lookup, subscription inspection, MFA reset drafts, ticket escalation, human approval requests, and audit logging. It refuses unsafe or unauthorized actions, scrubs PII before it reaches the LLM, and escalates sensitive cases. Built with Python, LangChain, the OpenAI API, and deterministic guardrails.
 
 ## Architecture
 
@@ -10,17 +10,20 @@ User message
     → guardrails.py  (refuse injection / require approval / require escalation)
     → retrieval.py   (search data/docs, sanitize snippets)
     → LangChain ChatOpenAI (tool calling, gpt-4o-mini)
-    → tools.py       (check_invoice_status, inspect_subscription, ...)
-      → db.py        (SQLite queries)
+    → tools.py       (check_invoice_status, inspect_subscription, draft_mfa_reset_request,
+                       escalate_ticket, request_human_approval, log_audit_event)
+      → helpers.py   (scrub_pii, normalize_*, format_*)
+      → db.py        (SQLite queries + audit_log inserts)
     → loop until done
   → AgentResponse (final_text, escalated, refused, tools_used)
 ```
 
 - **agent.py** — Orchestration loop using LangChain (`ChatOpenAI` + tool binding) when `OPENAI_API_KEY` is set. Tests pass a mocked OpenAI client directly.
-- **guardrails.py** — Deterministic policy in code: refuse injection/override/credential requests; require approval for MFA reset; require escalation for enterprise/sensitive actions; allow/deny tools by role.
+- **guardrails.py** — Deterministic policy in code: refuse injection/override/credential requests; require approval for MFA reset; require escalation for enterprise/sensitive actions; classify tools as read or write; allow/deny tools by role.
 - **retrieval.py** — Loads markdown from `data/docs/`, keyword search, returns top-k snippets. Sanitizes dangerous phrases (e.g. "ignore previous instructions") before injecting into the prompt.
-- **tools.py** — Five tools: `check_invoice_status`, `inspect_subscription`, `draft_mfa_reset_request`, `escalate_ticket`, `request_human_approval`. All backed by `db.py`; no LLM inside tools.
-- **db.py** — SQLite connection and parameterized queries. Schema in `app/schema.sql`.
+- **tools.py** — Six tools: `check_invoice_status`, `inspect_subscription`, `draft_mfa_reset_request`, `escalate_ticket`, `request_human_approval`, `log_audit_event`. All backed by `db.py`; no LLM inside tools. Write tools scrub PII from arguments and results.
+- **helpers.py** — `scrub_pii()` replaces email addresses with `[EMAIL REDACTED]`. Normalization and formatting helpers.
+- **db.py** — SQLite connection, parameterized queries, and `insert_audit_event()` for the audit log. Schema in `app/schema.sql`.
 
 ## Repository structure
 
@@ -81,14 +84,15 @@ Data files in `data/generated/` are checked in so you can run tests immediately 
 
 ## SQLite schema
 
-Defined in `app/schema.sql`. Four tables:
+Defined in `app/schema.sql`. Five tables:
 
 | Table | Columns |
 |-------|---------|
-| `accounts` | id, name, tier, is_enterprise |
+| `accounts` | id, name, tier, is_enterprise, contact_email |
 | `subscriptions` | account_id, plan, status |
 | `invoices` | id, account_id, amount_cents, status, note |
 | `tickets` | id, account_id, subject, status |
+| `audit_log` | id, timestamp, event_type, account_id, details |
 
 Initialize with `make init-db` or `python scripts/init_db.py`.
 
@@ -105,8 +109,8 @@ python -m app.main --query "Please escalate ticket TICK-2041"
 
 | Layer | Command | What it tests |
 |-------|---------|---------------|
-| **Unit** | `make test-unit` | Guardrails, retrieval, helpers |
-| **Property** | `make test-property` | Hypothesis invariants (normalization, sanitization) |
+| **Unit** | `make test-unit` | Guardrails, retrieval, helpers, PII scrubbing, audit logging |
+| **Property** | `make test-property` | Hypothesis invariants (normalization, sanitization, PII completeness) |
 | **Component** | `make test-component` | Orchestrator with mocked model |
 | **Integration** | `make test-integration` | Full flow: real DB + docs, mocked OpenAI |
 | **All pytest** | `make test` | All of the above |
@@ -134,16 +138,16 @@ To enable the API-dependent jobs in your fork: go to **Settings > Secrets and va
 
 | Layer | Catches | Misses | Blocks |
 |-------|---------|--------|--------|
-| Unit (pytest) | Policy, auth, retrieval filters, helpers | Integration, LLM behavior | PR + release |
-| Property (Hypothesis) | Invariants, normalization, sanitization | Concrete scenarios | PR + release |
+| Unit (pytest) | Policy, auth, retrieval filters, helpers, PII scrubbing, audit logging | Integration, LLM behavior | PR + release |
+| Property (Hypothesis) | Invariants, normalization, sanitization, PII completeness | Concrete scenarios | PR + release |
 | Component (pytest + mocks) | Orchestrator branches, tool selection | Full stack, real model | PR |
 | Integration (pytest) | E2E flows, refusal/escalation paths | Non-deterministic LLM output | PR + release |
-| Trajectly | Tool-call sequence regression, contracts | Semantic quality, safety | PR (smoke), main (full) |
+| Trajectly | Behavioral contracts: arg validation, PII leak detection, side-effect enforcement, sequence + at_most_once + eventually constraints | Semantic quality, safety | PR (smoke), main (full) |
 | Promptfoo | Scenario quality, refusal, groundedness | Execution path, determinism | Main + release |
 | Garak | Adversarial/safety (injection, override) | Business logic, trajectory | Main (smoke) |
 
 **Trajectly catches execution-path regressions, but it does not replace scenario evals, safety testing, or broad behavioral assessment.** It is one layer in the pyramid.
 
-## Blog
+## Deep dive
 
-For a deep dive into the testing strategy, see [blog/testing-the-support-agent.md](blog/testing-the-support-agent.md).
+For a detailed walkthrough of the testing strategy and the rationale behind each layer, see the [companion blog article](https://github.com/aashmawy/support-agent).

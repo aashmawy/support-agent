@@ -4,7 +4,8 @@ CREATE TABLE IF NOT EXISTS accounts (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
     tier TEXT NOT NULL,
-    is_enterprise INTEGER NOT NULL DEFAULT 0
+    is_enterprise INTEGER NOT NULL DEFAULT 0,
+    contact_email TEXT
 );
 
 CREATE TABLE IF NOT EXISTS subscriptions (
@@ -27,4 +28,12 @@ CREATE TABLE IF NOT EXISTS tickets (
     account_id TEXT NOT NULL REFERENCES accounts(id),
     subject TEXT NOT NULL,
     status TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS audit_log (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    timestamp TEXT NOT NULL DEFAULT (datetime('now')),
+    event_type TEXT NOT NULL,
+    account_id TEXT,
+    details TEXT
 );

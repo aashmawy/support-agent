@@ -4,10 +4,10 @@ from __future__ import annotations
 import os
 import sys
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 import trajectly
-from app.tools import escalate_ticket
+from app.tools import escalate_ticket, log_audit_event
 
 DEFAULT_MODEL = "gpt-4o-mini"
 
@@ -16,10 +16,11 @@ def _should_use_openai() -> bool:
     return bool(os.environ.get("OPENAI_API_KEY"))
 
 
-def _llm_respond(escalation_result: dict, *, use_openai: bool) -> str:
+def _llm_respond(escalation_result: dict, audit_result: dict, *, use_openai: bool) -> str:
     prompt = (
         "You are a B2B SaaS support agent. The user asked to escalate ticket TICK-2041. "
-        f"Escalation result: {escalation_result}. Summarize the status for the user."
+        f"Escalation result: {escalation_result}. Audit log: {audit_result}. "
+        "Summarize the status for the user."
     )
     if use_openai:
         from openai import OpenAI
@@ -31,7 +32,7 @@ def _llm_respond(escalation_result: dict, *, use_openai: bool) -> str:
             temperature=0,
         )
         return resp.choices[0].message.content or ""
-    return f"Ticket escalated: {escalation_result.get('status')}. Subject: {escalation_result.get('subject')}."
+    return f"Ticket escalated: {escalation_result.get('status')}. Audit: {audit_result.get('status')}."
 
 
 def build_app(*, use_openai: bool | None = None) -> trajectly.App:
@@ -48,14 +49,29 @@ def build_app(*, use_openai: bool | None = None) -> trajectly.App:
         return escalate_ticket(ticket_id)
 
     @app.node(
+        id="log_audit_event",
+        type="tool",
+        depends_on={"escalation_result": "escalate_ticket"},
+    )
+    def audit_node(escalation_result: dict) -> dict:
+        return log_audit_event(
+            event_type="escalation",
+            account_id=escalation_result.get("ticket_id", "TICK-2041"),
+            details=f"Ticket escalated: {escalation_result.get('subject', '')}",
+        )
+
+    @app.node(
         id="respond",
         type="llm",
-        depends_on={"escalation_result": "escalate_ticket"},
+        depends_on={
+            "escalation_result": "escalate_ticket",
+            "audit_result": "log_audit_event",
+        },
         provider=provider,
         model=model,
     )
-    def respond_node(escalation_result: dict) -> str:
-        return _llm_respond(escalation_result, use_openai=use_openai)
+    def respond_node(escalation_result: dict, audit_result: dict) -> str:
+        return _llm_respond(escalation_result, audit_result, use_openai=use_openai)
 
     return app
 

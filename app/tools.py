@@ -1,13 +1,14 @@
-"""Internal tools: invoice status, subscription, MFA draft, escalation, human approval."""
+"""Internal tools: invoice status, subscription, MFA draft, escalation, human approval, audit log."""
 from app.db import (
     get_account,
     get_connection,
     get_invoice,
     get_subscription,
     get_ticket,
+    insert_audit_event,
 )
 from app.guardrails import require_escalation
-from app.helpers import normalize_account_id, normalize_invoice_id, normalize_ticket_id
+from app.helpers import normalize_account_id, normalize_invoice_id, normalize_ticket_id, scrub_pii
 
 
 def check_invoice_status(invoice_id: str, allowed: set[str] | None = None) -> dict:
@@ -50,22 +51,34 @@ def inspect_subscription(account_id: str, allowed: set[str] | None = None) -> di
 
 
 def draft_mfa_reset_request(account_id: str, user_id: str | None = None, allowed: set[str] | None = None) -> dict:
-    """Draft an MFA reset request (requires human approval). Does not execute reset."""
+    """Draft an MFA reset request (requires human approval). Does not execute reset.
+    PII (contact_email) is scrubbed before returning data to the LLM.
+    """
     if allowed is not None and "draft_mfa_reset_request" not in allowed:
         return {"error": "Not authorized to draft MFA reset"}
     aid = normalize_account_id(account_id)
-    if require_escalation(aid, "draft_mfa_reset_request"):
+    conn = get_connection()
+    try:
+        acc = get_account(conn, aid)
+        if not acc:
+            return {"error": "Account not found", "account_id": aid}
+        contact = scrub_pii(acc.get("contact_email") or "")
+        if require_escalation(aid, "draft_mfa_reset_request"):
+            return {
+                "status": "requires_approval",
+                "message": "Enterprise account: MFA reset must be approved. Use request_human_approval.",
+                "account_id": aid,
+                "contact": contact,
+            }
         return {
-            "status": "requires_approval",
-            "message": "Enterprise account: MFA reset must be approved. Use request_human_approval.",
+            "status": "draft",
+            "message": "MFA reset request drafted for approval.",
             "account_id": aid,
+            "user_id": user_id or "admin",
+            "contact": contact,
         }
-    return {
-        "status": "draft",
-        "message": "MFA reset request drafted for approval.",
-        "account_id": aid,
-        "user_id": user_id or "admin",
-    }
+    finally:
+        conn.close()
 
 
 def escalate_ticket(ticket_id: str, allowed: set[str] | None = None) -> dict:
@@ -90,11 +103,25 @@ def request_human_approval(action: str, reason: str, allowed: set[str] | None = 
     return {"status": "pending_approval", "action": action, "reason": reason}
 
 
-# Registry for the agent to resolve names to callables
+def log_audit_event(event_type: str, account_id: str, details: str, allowed: set[str] | None = None) -> dict:
+    """Write an entry to the audit_log table. Used for sensitive actions like MFA resets and escalations."""
+    if allowed is not None and "log_audit_event" not in allowed:
+        return {"error": "Not authorized to log audit events"}
+    aid = normalize_account_id(account_id)
+    safe_details = scrub_pii(details)
+    conn = get_connection()
+    try:
+        row_id = insert_audit_event(conn, event_type, aid, safe_details)
+        return {"status": "logged", "audit_id": row_id, "event_type": event_type, "account_id": aid}
+    finally:
+        conn.close()
+
+
 TOOL_REGISTRY = {
     "check_invoice_status": check_invoice_status,
     "inspect_subscription": inspect_subscription,
     "draft_mfa_reset_request": draft_mfa_reset_request,
     "escalate_ticket": escalate_ticket,
     "request_human_approval": request_human_approval,
+    "log_audit_event": log_audit_event,
 }

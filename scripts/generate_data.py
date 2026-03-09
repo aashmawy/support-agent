@@ -27,10 +27,10 @@ def ensure_dirs():
 
 def generate_accounts():
     data = [
-        {"id": "ACME-001", "name": "Acme Corp", "tier": "professional", "is_enterprise": 0},
-        {"id": "ACME-ENT-09", "name": "Acme Enterprise", "tier": "enterprise", "is_enterprise": 1},
-        {"id": "BETA-002", "name": "Beta Inc", "tier": "starter", "is_enterprise": 0},
-        {"id": "GAMMA-003", "name": "Gamma LLC", "tier": "professional", "is_enterprise": 0},
+        {"id": "ACME-001", "name": "Acme Corp", "tier": "professional", "is_enterprise": 0, "contact_email": "admin@acmecorp.com"},
+        {"id": "ACME-ENT-09", "name": "Acme Enterprise", "tier": "enterprise", "is_enterprise": 1, "contact_email": "security@acme-enterprise.com"},
+        {"id": "BETA-002", "name": "Beta Inc", "tier": "starter", "is_enterprise": 0, "contact_email": "support@betainc.io"},
+        {"id": "GAMMA-003", "name": "Gamma LLC", "tier": "professional", "is_enterprise": 0, "contact_email": "ops@gammallc.com"},
     ]
     (GENERATED_DIR / "accounts.json").write_text(json.dumps(data, indent=2))
     return data

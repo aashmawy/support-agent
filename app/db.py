@@ -1,4 +1,4 @@
-"""SQLite access for accounts, subscriptions, invoices, tickets."""
+"""SQLite access for accounts, subscriptions, invoices, tickets, audit log."""
 import os
 import sqlite3
 from pathlib import Path
@@ -14,12 +14,18 @@ def get_connection(db_path: str | None = None):
 
 def get_account(conn: sqlite3.Connection, account_id: str) -> dict | None:
     row = conn.execute(
-        "SELECT id, name, tier, is_enterprise FROM accounts WHERE id = ?",
+        "SELECT id, name, tier, is_enterprise, contact_email FROM accounts WHERE id = ?",
         (account_id,),
     ).fetchone()
     if not row:
         return None
-    return {"id": row[0], "name": row[1], "tier": row[2], "is_enterprise": bool(row[3])}
+    return {
+        "id": row[0],
+        "name": row[1],
+        "tier": row[2],
+        "is_enterprise": bool(row[3]),
+        "contact_email": row[4],
+    }
 
 
 def get_subscription(conn: sqlite3.Connection, account_id: str) -> dict | None:
@@ -50,6 +56,15 @@ def get_ticket(conn: sqlite3.Connection, ticket_id: str) -> dict | None:
     if not row:
         return None
     return {"id": row[0], "account_id": row[1], "subject": row[2], "status": row[3]}
+
+
+def insert_audit_event(conn: sqlite3.Connection, event_type: str, account_id: str, details: str) -> int:
+    cursor = conn.execute(
+        "INSERT INTO audit_log (event_type, account_id, details) VALUES (?, ?, ?)",
+        (event_type, account_id, details),
+    )
+    conn.commit()
+    return cursor.lastrowid or 0
 
 
 def list_invoices_for_account(conn: sqlite3.Connection, account_id: str) -> list[dict]:

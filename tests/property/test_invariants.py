@@ -1,11 +1,11 @@
-"""Property-based tests with Hypothesis: normalization, auth consistency, sanitization."""
+"""Property-based tests with Hypothesis: normalization, auth consistency, sanitization, PII scrubbing."""
 from pathlib import Path
 
 from hypothesis import given
 from hypothesis import strategies as st
 
 from app.guardrails import allowed_tools
-from app.helpers import normalize_account_id, normalize_ticket_id
+from app.helpers import normalize_account_id, normalize_ticket_id, scrub_pii
 from app.retrieval import _sanitize_snippet
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -55,3 +55,22 @@ def test_normalize_ticket_id_idempotent(s: str):
     n1 = normalize_ticket_id(s)
     n2 = normalize_ticket_id(n1)
     assert n1 == n2
+
+
+EMAIL_STRATEGY = st.from_regex(r"[a-z]{1,8}@[a-z]{1,6}\.[a-z]{2,4}", fullmatch=True)
+
+
+@given(st.tuples(st.text(min_size=0, max_size=30), EMAIL_STRATEGY, st.text(min_size=0, max_size=30)))
+def test_scrub_pii_removes_all_emails(parts):
+    """Any string containing an email address must have it scrubbed."""
+    prefix, email, suffix = parts
+    text = prefix + email + suffix
+    result = scrub_pii(text)
+    assert "@" not in result
+    assert "[EMAIL REDACTED]" in result
+
+
+@given(st.text(min_size=0, max_size=100).filter(lambda t: "@" not in t))
+def test_scrub_pii_preserves_non_email_text(text: str):
+    """Text without email addresses is returned unchanged."""
+    assert scrub_pii(text) == text

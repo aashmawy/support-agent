@@ -4,10 +4,10 @@ from __future__ import annotations
 import os
 import sys
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 import trajectly
-from app.tools import draft_mfa_reset_request, request_human_approval
+from app.tools import draft_mfa_reset_request, log_audit_event, request_human_approval
 
 DEFAULT_MODEL = "gpt-4o-mini"
 
@@ -16,12 +16,12 @@ def _should_use_openai() -> bool:
     return bool(os.environ.get("OPENAI_API_KEY"))
 
 
-def _llm_respond(draft_result: dict, approval_result: dict, *, use_openai: bool) -> str:
+def _llm_respond(draft_result: dict, approval_result: dict, audit_result: dict, *, use_openai: bool) -> str:
     prompt = (
         "You are a B2B SaaS support agent. The user asked to reset MFA for the admin "
-        "on account ACME-ENT-09. You drafted the request and routed it for human approval. "
-        f"Draft result: {draft_result}. Approval result: {approval_result}. "
-        "Summarize the status for the user."
+        "on account ACME-ENT-09. You drafted the request, routed it for human approval, "
+        f"and logged an audit event. Draft: {draft_result}. Approval: {approval_result}. "
+        f"Audit: {audit_result}. Summarize the status for the user."
     )
     if use_openai:
         from openai import OpenAI
@@ -33,7 +33,7 @@ def _llm_respond(draft_result: dict, approval_result: dict, *, use_openai: bool)
             temperature=0,
         )
         return resp.choices[0].message.content or ""
-    return f"MFA reset drafted: {draft_result.get('status')}. Approval: {approval_result.get('status')}."
+    return f"MFA reset drafted: {draft_result.get('status')}. Approval: {approval_result.get('status')}. Audit: {audit_result.get('status')}."
 
 
 def build_app(*, use_openai: bool | None = None) -> trajectly.App:
@@ -61,17 +61,30 @@ def build_app(*, use_openai: bool | None = None) -> trajectly.App:
         )
 
     @app.node(
+        id="log_audit_event",
+        type="tool",
+        depends_on={"approval_result": "request_human_approval"},
+    )
+    def audit_node(approval_result: dict) -> dict:
+        return log_audit_event(
+            event_type="mfa_reset",
+            account_id="ACME-ENT-09",
+            details=f"MFA reset requested. Approval status: {approval_result.get('status', 'unknown')}",
+        )
+
+    @app.node(
         id="respond",
         type="llm",
         depends_on={
             "draft_result": "draft_mfa_reset_request",
             "approval_result": "request_human_approval",
+            "audit_result": "log_audit_event",
         },
         provider=provider,
         model=model,
     )
-    def respond_node(draft_result: dict, approval_result: dict) -> str:
-        return _llm_respond(draft_result, approval_result, use_openai=use_openai)
+    def respond_node(draft_result: dict, approval_result: dict, audit_result: dict) -> str:
+        return _llm_respond(draft_result, approval_result, audit_result, use_openai=use_openai)
 
     return app
 

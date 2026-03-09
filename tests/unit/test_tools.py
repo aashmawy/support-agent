@@ -16,12 +16,12 @@ def tool_db(tmp_path):
     conn = sqlite3.connect(db_path)
     conn.executescript(schema)
     conn.execute(
-        "INSERT INTO accounts (id, name, tier, is_enterprise) VALUES (?,?,?,?)",
-        ("ACME-001", "Acme Corp", "professional", 0),
+        "INSERT INTO accounts (id, name, tier, is_enterprise, contact_email) VALUES (?,?,?,?,?)",
+        ("ACME-001", "Acme Corp", "professional", 0, "admin@acmecorp.com"),
     )
     conn.execute(
-        "INSERT INTO accounts (id, name, tier, is_enterprise) VALUES (?,?,?,?)",
-        ("ACME-ENT-09", "Acme Enterprise", "enterprise", 1),
+        "INSERT INTO accounts (id, name, tier, is_enterprise, contact_email) VALUES (?,?,?,?,?)",
+        ("ACME-ENT-09", "Acme Enterprise", "enterprise", 1, "security@acme-enterprise.com"),
     )
     conn.execute(
         "INSERT INTO subscriptions (account_id, plan, status) VALUES (?,?,?)",
@@ -108,6 +108,12 @@ class TestDraftMfaResetRequest:
         result = draft_mfa_reset_request("ACME-001", allowed=set())
         assert "error" in result
 
+    def test_pii_scrubbed_from_contact(self, tool_db):
+        from app.tools import draft_mfa_reset_request
+        result = draft_mfa_reset_request("ACME-001")
+        assert "@" not in result.get("contact", "")
+        assert "[EMAIL REDACTED]" in result.get("contact", "")
+
 
 class TestEscalateTicket:
     def test_existing_ticket(self, tool_db):
@@ -140,6 +146,32 @@ class TestRequestHumanApproval:
         assert "error" in result
 
 
+class TestLogAuditEvent:
+    def test_logs_event(self, tool_db):
+        from app.tools import log_audit_event
+        result = log_audit_event("mfa_reset", "ACME-001", "MFA reset requested")
+        assert result["status"] == "logged"
+        assert result["event_type"] == "mfa_reset"
+        assert result["account_id"] == "ACME-001"
+        assert "audit_id" in result
+
+    def test_scrubs_pii_in_details(self, tool_db):
+        from app.tools import log_audit_event
+        result = log_audit_event("escalation", "ACME-001", "Contact: admin@acmecorp.com")
+        assert result["status"] == "logged"
+        import sqlite3
+        conn = sqlite3.connect(tool_db)
+        row = conn.execute("SELECT details FROM audit_log WHERE id = ?", (result["audit_id"],)).fetchone()
+        conn.close()
+        assert "@" not in row[0]
+        assert "[EMAIL REDACTED]" in row[0]
+
+    def test_not_authorized(self, tool_db):
+        from app.tools import log_audit_event
+        result = log_audit_event("test", "ACME-001", "details", allowed=set())
+        assert "error" in result
+
+
 class TestToolRegistry:
     def test_all_tools_registered(self):
         from app.tools import TOOL_REGISTRY
@@ -149,6 +181,7 @@ class TestToolRegistry:
             "draft_mfa_reset_request",
             "escalate_ticket",
             "request_human_approval",
+            "log_audit_event",
         }
         assert set(TOOL_REGISTRY.keys()) == expected
 

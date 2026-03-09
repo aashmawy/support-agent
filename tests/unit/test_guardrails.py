@@ -41,6 +41,7 @@ def test_allowed_tools_support_agent():
     assert "inspect_subscription" in t
     assert "escalate_ticket" in t
     assert "request_human_approval" in t
+    assert "log_audit_event" in t
 
 
 def test_blocked_role():

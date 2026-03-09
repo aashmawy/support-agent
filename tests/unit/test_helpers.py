@@ -1,9 +1,10 @@
-"""Unit tests for helpers: normalize_account_id, normalize_ticket_id, format_tool_result."""
+"""Unit tests for helpers: normalize_account_id, normalize_ticket_id, format_tool_result, scrub_pii."""
 from app.helpers import (
     format_tool_result,
     normalize_account_id,
     normalize_invoice_id,
     normalize_ticket_id,
+    scrub_pii,
 )
 
 
@@ -48,3 +49,23 @@ def test_format_tool_result():
 
 def test_format_tool_result_empty():
     assert format_tool_result({}) == ""
+
+
+def test_scrub_pii_replaces_email():
+    assert scrub_pii("Contact: admin@acmecorp.com") == "Contact: [EMAIL REDACTED]"
+
+
+def test_scrub_pii_multiple_emails():
+    text = "a@b.com and c@d.org"
+    result = scrub_pii(text)
+    assert "@" not in result
+    assert result.count("[EMAIL REDACTED]") == 2
+
+
+def test_scrub_pii_no_email():
+    assert scrub_pii("No emails here") == "No emails here"
+
+
+def test_scrub_pii_empty():
+    assert scrub_pii("") == ""
+    assert scrub_pii(None) == ""

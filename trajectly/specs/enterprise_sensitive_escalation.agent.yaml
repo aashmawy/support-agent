@@ -5,11 +5,18 @@ workdir: ../..
 fixture_policy: by_hash
 strict: true
 budget_thresholds:
-  max_tool_calls: 4
-  max_tokens: 500
+  max_tool_calls: 6
+  max_tokens: 600
 contracts:
   tools:
-    allow: [escalate_ticket]
-    deny: []
+    allow: [escalate_ticket, log_audit_event]
+  args:
+    escalate_ticket:
+      required_keys: [ticket_id]
+      fields:
+        ticket_id:
+          type: string
+          regex: "^TICK-\\d+$"
   sequence:
     require: [tool:escalate_ticket]
+    eventually: [log_audit_event]

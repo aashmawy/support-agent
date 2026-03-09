@@ -1,4 +1,7 @@
-"""Normalization and formatting helpers."""
+"""Normalization, formatting, and PII scrubbing helpers."""
+import re
+
+_EMAIL_RE = re.compile(r"[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}")
 
 
 def normalize_account_id(raw: str) -> str:
@@ -20,6 +23,13 @@ def normalize_invoice_id(raw: str) -> str:
     if not raw or not isinstance(raw, str):
         return ""
     return raw.strip().upper()
+
+
+def scrub_pii(text: str) -> str:
+    """Replace email addresses with [EMAIL REDACTED]."""
+    if not text or not isinstance(text, str):
+        return text or ""
+    return _EMAIL_RE.sub("[EMAIL REDACTED]", text)
 
 
 def format_tool_result(d: dict) -> str:

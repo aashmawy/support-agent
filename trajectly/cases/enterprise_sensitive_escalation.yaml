@@ -1,12 +1,21 @@
-# Golden scenario: enterprise sensitive escalation
+# Golden scenario: enterprise sensitive escalation + audit trail
 # Human-readable definition; Trajectly runs trajectly/specs/enterprise_sensitive_escalation.agent.yaml
 id: traj-escalation
 input: "Please escalate ticket TICK-2041"
 expected_tool_sequence:
   - escalate_ticket
+  - log_audit_event
 scenario: enterprise_sensitive_escalation
 contract:
   tools:
-    allow: [escalate_ticket]
+    allow: [escalate_ticket, log_audit_event]
+  args:
+    escalate_ticket:
+      required_keys: [ticket_id]
+      fields:
+        ticket_id:
+          type: string
+          regex: "^TICK-\\d+$"
   sequence:
     require: [tool:escalate_ticket]
+    eventually: [log_audit_event]
