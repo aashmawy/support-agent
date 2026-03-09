@@ -33,6 +33,9 @@ def main():
     conn = sqlite3.connect(DB_PATH)
     conn.executescript(get_schema())
 
+    for table in ("accounts", "subscriptions", "invoices", "tickets"):
+        conn.execute(f"DELETE FROM {table}")
+
     accounts = load_json("accounts.json")
     for row in accounts:
         conn.execute(

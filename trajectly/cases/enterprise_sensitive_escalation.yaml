@@ -6,5 +6,7 @@ expected_tool_sequence:
   - escalate_ticket
 scenario: enterprise_sensitive_escalation
 contract:
-  allow: [escalate_ticket, request_human_approval]
-  deny: []
+  tools:
+    allow: [escalate_ticket]
+  sequence:
+    require: [tool:escalate_ticket]

@@ -7,5 +7,10 @@ expected_tool_sequence:
   - request_human_approval
 scenario: mfa_reset_requires_approval
 contract:
-  allow: [draft_mfa_reset_request, request_human_approval]
-  deny: []
+  tools:
+    allow: [draft_mfa_reset_request, request_human_approval]
+  sequence:
+    require: [tool:draft_mfa_reset_request, tool:request_human_approval]
+    require_before:
+      - before: tool:draft_mfa_reset_request
+        after: tool:request_human_approval

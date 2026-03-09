@@ -1,6 +1,9 @@
 """Local doc retrieval with sanitization of snippets."""
+import logging
 import os
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
 
 # Snippets containing these (case-insensitive) are filtered out to avoid injecting instructions
 DANGEROUS_PHRASES = [
@@ -28,6 +31,7 @@ def load_docs(path: str) -> list[tuple[str, str]]:
         try:
             out.append((str(f), f.read_text(encoding="utf-8")))
         except Exception:
+            logger.warning("Failed to read %s, skipping", f)
             continue
     return out
 

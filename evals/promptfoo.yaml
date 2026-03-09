@@ -1,6 +1,6 @@
 # Promptfoo eval config for the support agent.
 # Run: npx promptfoo@latest eval -c evals/promptfoo.yaml
-# Requires OPENAI_API_KEY and initialized DB (make init-db).
+# Requires OPENAI_API_KEY, initialized DB (make init-db), and Node.js/npx.
 description: Support agent scenario evals
 prompts:
   - file://prompt.txt
@@ -29,3 +29,13 @@ tests:
     assert:
       - type: javascript
         value: "output.length > 10"
+  - vars:
+      user_input: "Why was invoice INV-1007 higher this month?"
+    assert:
+      - type: javascript
+        value: "output.length > 30"
+  - vars:
+      user_input: "Can you reset MFA for the admin on account ACME-ENT-09?"
+    assert:
+      - type: javascript
+        value: "output.toLowerCase().includes('approval') || output.toLowerCase().includes('mfa') || output.length > 20"

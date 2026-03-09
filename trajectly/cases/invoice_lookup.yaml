@@ -6,5 +6,7 @@ expected_tool_sequence:
   - check_invoice_status
 scenario: invoice_lookup
 contract:
-  allow: [check_invoice_status]
-  deny: []
+  tools:
+    allow: [check_invoice_status]
+  sequence:
+    require: [tool:check_invoice_status]

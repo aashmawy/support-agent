@@ -1,29 +1,25 @@
 """Normalization and formatting helpers."""
-import re
 
 
 def normalize_account_id(raw: str) -> str:
-    """Normalize account ID: uppercase, strip. Pattern like ACME-001 or ACME-ENT-09."""
+    """Normalize account ID: uppercase and strip whitespace."""
     if not raw or not isinstance(raw, str):
         return ""
-    s = raw.strip().upper()
-    return s if re.match(r"^[A-Z0-9]+-[A-Z0-9]+$", s) else s
+    return raw.strip().upper()
 
 
 def normalize_ticket_id(raw: str) -> str:
-    """Normalize ticket ID: uppercase, strip. Pattern like TICK-2041."""
+    """Normalize ticket ID: uppercase and strip whitespace."""
     if not raw or not isinstance(raw, str):
         return ""
-    s = raw.strip().upper()
-    return s if re.match(r"^TICK-\d+$", s) else s
+    return raw.strip().upper()
 
 
 def normalize_invoice_id(raw: str) -> str:
-    """Normalize invoice ID: uppercase, strip. Pattern like INV-1007."""
+    """Normalize invoice ID: uppercase and strip whitespace."""
     if not raw or not isinstance(raw, str):
         return ""
-    s = raw.strip().upper()
-    return s if re.match(r"^INV-\d+$", s) else s
+    return raw.strip().upper()
 
 
 def format_tool_result(d: dict) -> str:

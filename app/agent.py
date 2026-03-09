@@ -1,5 +1,7 @@
 """Orchestration: retrieval, OpenAI (LangChain when API key set), guardrails, tools."""
 import json
+import logging
+import os
 from typing import Any
 
 from openai import OpenAI
@@ -211,8 +213,9 @@ def _run_with_langchain(api_key: str, system: str, user_message: str, allowed: s
                 final_text="API authentication failed. Please check your OPENAI_API_KEY.",
                 tools_used=tools_used,
             )
+        logging.getLogger(__name__).exception("Unexpected error in agent")
         return AgentResponse(
-            final_text=f"An error occurred while processing your request: {e!s}",
+            final_text="An unexpected error occurred while processing your request. Please try again.",
             tools_used=tools_used,
         )
 
@@ -267,6 +270,7 @@ def run(
     db_path = db_path or cfg["support_db_path"]
     docs_path = docs_path or cfg["support_docs_path"]
     api_key = cfg["openai_api_key"]
+    os.environ["SUPPORT_DB_PATH"] = db_path
     if not api_key and openai_client is None:
         return AgentResponse(
             final_text="[Agent unavailable: OPENAI_API_KEY not set]",

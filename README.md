@@ -39,25 +39,26 @@ scripts/
   init_db.py           # create SQLite schema + load generated JSON
 tests/
   conftest.py
-  unit/                # test_guardrails.py, test_retrieval.py, test_helpers.py
+  unit/                # test_guardrails.py, test_retrieval.py, test_helpers.py, test_tools.py
   property/            # test_invariants.py (Hypothesis)
   component/           # test_orchestrator.py (mocked OpenAI)
   integration/         # test_agent_flow.py (real DB + docs, mocked OpenAI)
 evals/
-  promptfoo.yaml       promptfoo_cases.yaml
+  promptfoo.yaml       # scenario evals (includes cases from promptfoo_cases.yaml inline)
   prompt.txt           agent_provider.py    run_agent.py
+trt_adapters/          # Trajectly adapter scripts (invoice_lookup, mfa_reset, enterprise_escalation)
 trajectly/
   config.yaml
   specs/               # invoice_lookup.agent.yaml, mfa_reset_requires_approval.agent.yaml,
                        # enterprise_sensitive_escalation.agent.yaml
-  cases/               # human-readable scenario definitions
+  cases/               # human-readable scenario definitions (mirror specs contracts)
 .github/workflows/
   ci.yaml
-blog/
-  testing-the-support-agent.md
 ```
 
 ## Setup
+
+**Prerequisites:** Python 3.11+, [Node.js/npx](https://nodejs.org) (for promptfoo evals only).
 
 ```bash
 python3.11 -m venv .venv
@@ -67,7 +68,8 @@ cp .env.example .env             # add your OPENAI_API_KEY (loaded automatically
 make init-db                     # create SQLite DB from fixtures
 ```
 
-To regenerate fixture data: `make generate-data && make init-db`.
+To regenerate fixture data from scratch: `make generate-data && make init-db`.
+Data files in `data/generated/` are checked in so you can run tests immediately after cloning.
 
 ## Environment variables
 

@@ -7,7 +7,6 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 import trajectly
-
 from app.tools import draft_mfa_reset_request, request_human_approval
 
 DEFAULT_MODEL = "gpt-4o-mini"

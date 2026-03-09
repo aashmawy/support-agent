@@ -9,10 +9,15 @@ import os
 import sys
 from pathlib import Path
 
-# Ensure repo root is on path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 os.chdir(REPO_ROOT)
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv(REPO_ROOT / ".env")
+except ImportError:
+    pass
 
 from app.agent import run
 
