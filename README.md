@@ -6,32 +6,32 @@ A realistic B2B SaaS support operations agent that answers questions from a loca
 
 ```mermaid
 flowchart TD
-    User([User message]) --> Agent[agent.py\nOrchestration loop]
-    Agent --> Guardrails{guardrails.py\nRefuse? Escalate?}
+    User([User message]) --> Agent["agent.py — Orchestration loop"]
+    Agent --> Guardrails{"guardrails.py — Refuse? Escalate?"}
     Guardrails -- refused --> Refusal([Refused response])
-    Guardrails -- safe --> Retrieval[retrieval.py\nSearch docs · sanitize snippets]
-    Retrieval --> LLM[LangChain ChatOpenAI\ngpt-4o-mini · tool calling]
-    LLM -- tool call --> Tools[tools.py]
-    Tools --> Helpers[helpers.py\nscrub_pii · normalize]
-    Tools --> DB[(db.py\nSQLite)]
-    DB --> AuditLog[(audit_log)]
+    Guardrails -- safe --> Retrieval["retrieval.py — Search docs, sanitize snippets"]
+    Retrieval --> LLM["LangChain ChatOpenAI — gpt-4o-mini, tool calling"]
+    LLM -- tool call --> Tools["tools.py"]
+    Tools --> Helpers["helpers.py — scrub_pii, normalize"]
+    Tools --> DB[("db.py — SQLite")]
+    DB --> AuditLog[("audit_log")]
     Tools -- result --> LLM
-    LLM -- final text --> Response([AgentResponse\nfinal_text · escalated · refused · tools_used])
+    LLM -- final text --> Response(["AgentResponse — final_text, escalated, refused, tools_used"])
 
-    subgraph Read tools
-        T1[check_invoice_status]
-        T2[inspect_subscription]
+    subgraph ReadTools ["Read tools"]
+        T1["check_invoice_status"]
+        T2["inspect_subscription"]
     end
 
-    subgraph Write tools
-        T3[draft_mfa_reset_request]
-        T4[escalate_ticket]
-        T5[request_human_approval]
-        T6[log_audit_event]
+    subgraph WriteTools ["Write tools"]
+        T3["draft_mfa_reset_request"]
+        T4["escalate_ticket"]
+        T5["request_human_approval"]
+        T6["log_audit_event"]
     end
 
-    Tools --- Read tools
-    Tools --- Write tools
+    Tools --- ReadTools
+    Tools --- WriteTools
 ```
 
 - **agent.py** — Orchestration loop using LangChain (`ChatOpenAI` + tool binding) when `OPENAI_API_KEY` is set. Tests pass a mocked OpenAI client directly.
