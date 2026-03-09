@@ -1,10 +1,7 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  workflow_dispatch:  # manual trigger only; this file serves as a CI reference for users who fork the repo
 
 jobs:
   lint-and-unit:
