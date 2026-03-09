@@ -4,18 +4,34 @@ A realistic B2B SaaS support operations agent that answers questions from a loca
 
 ## Architecture
 
-```
-User message
-  → agent.py (orchestration loop)
-    → guardrails.py  (refuse injection / require approval / require escalation)
-    → retrieval.py   (search data/docs, sanitize snippets)
-    → LangChain ChatOpenAI (tool calling, gpt-4o-mini)
-    → tools.py       (check_invoice_status, inspect_subscription, draft_mfa_reset_request,
-                       escalate_ticket, request_human_approval, log_audit_event)
-      → helpers.py   (scrub_pii, normalize_*, format_*)
-      → db.py        (SQLite queries + audit_log inserts)
-    → loop until done
-  → AgentResponse (final_text, escalated, refused, tools_used)
+```mermaid
+flowchart TD
+    User([User message]) --> Agent[agent.py\nOrchestration loop]
+    Agent --> Guardrails{guardrails.py\nRefuse? Escalate?}
+    Guardrails -- refused --> Refusal([Refused response])
+    Guardrails -- safe --> Retrieval[retrieval.py\nSearch docs · sanitize snippets]
+    Retrieval --> LLM[LangChain ChatOpenAI\ngpt-4o-mini · tool calling]
+    LLM -- tool call --> Tools[tools.py]
+    Tools --> Helpers[helpers.py\nscrub_pii · normalize]
+    Tools --> DB[(db.py\nSQLite)]
+    DB --> AuditLog[(audit_log)]
+    Tools -- result --> LLM
+    LLM -- final text --> Response([AgentResponse\nfinal_text · escalated · refused · tools_used])
+
+    subgraph Read tools
+        T1[check_invoice_status]
+        T2[inspect_subscription]
+    end
+
+    subgraph Write tools
+        T3[draft_mfa_reset_request]
+        T4[escalate_ticket]
+        T5[request_human_approval]
+        T6[log_audit_event]
+    end
+
+    Tools --- Read tools
+    Tools --- Write tools
 ```
 
 - **agent.py** — Orchestration loop using LangChain (`ChatOpenAI` + tool binding) when `OPENAI_API_KEY` is set. Tests pass a mocked OpenAI client directly.
