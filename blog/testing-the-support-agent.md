@@ -8,7 +8,7 @@ We built an AI support agent. It looks up invoices, checks subscriptions, drafts
 
 Then we asked: *how do we actually test this thing?*
 
-The answer is not one tool. It is not just unit tests, not just evals, and not just safety scans. We ended up with six layers of testing, each catching failures the others miss. This article walks through all of them, using the [companion repository](https://github.com/your-org/support-agent) as the running example. Every command and file path in this article points at something real in that repo.
+The answer is not one tool. It is not just unit tests, not just evals, and not just safety scans. We ended up with six layers of testing, each catching failures the others miss. This article walks through all of them, using the [companion repository](https://github.com/aashmawy/support-agent) as the running example. Every command and file path in this article points at something real in that repo.
 
 ---
 
@@ -285,7 +285,7 @@ The top layers (trajectory regression, scenario evals, adversarial testing) veri
 
 **Trajectly catches execution-path regressions, but it does not replace scenario evals, safety testing, or broad behavioral assessment.** No single tool does. The pyramid works because each layer compensates for the others' blind spots.
 
-The [companion repository](https://github.com/your-org/support-agent) has everything you need to try this yourself: the agent, the data, the tests, the evals, the Trajectly specs, and the CI workflow. Clone it, run `make init-db && make test`, and start experimenting.
+The [companion repository](https://github.com/aashmawy/support-agent) has everything you need to try this yourself: the agent, the data, the tests, the evals, the Trajectly specs, and the CI workflow. Clone it, run `make init-db && make test`, and start experimenting.
 
 ---
 
@@ -301,5 +301,6 @@ Every testing layer in this article is built on open-source work. If any of thes
 - **[LangChain](https://github.com/langchain-ai/langchain)** — LLM orchestration and tool binding.
 - **[OpenAI Python SDK](https://github.com/openai/openai-python)** — The Python client for the OpenAI API.
 - **[Ruff](https://github.com/astral-sh/ruff)** — Fast Python linter and formatter.
+- **[support-agent](https://github.com/aashmawy/support-agent)** — This repo: the agent, tests, evals, and CI from the article. If it helped you, consider starring it.
 
 Open source only works when contributors know people are using and valuing their work. A star costs nothing and means a lot.
