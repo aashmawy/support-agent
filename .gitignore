@@ -1,0 +1,16 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+data/support.db
+.trajectly/
+promptfoo/outputs/
+.hypothesis/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/

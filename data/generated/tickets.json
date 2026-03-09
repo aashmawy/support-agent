@@ -1,0 +1,20 @@
+[
+  {
+    "id": "TICK-2041",
+    "account_id": "ACME-001",
+    "subject": "Billing discrepancy",
+    "status": "open"
+  },
+  {
+    "id": "TICK-2042",
+    "account_id": "ACME-ENT-09",
+    "subject": "MFA reset request",
+    "status": "pending_approval"
+  },
+  {
+    "id": "TICK-2043",
+    "account_id": "BETA-002",
+    "subject": "Feature question",
+    "status": "resolved"
+  }
+]

@@ -1,0 +1,100 @@
+"""Internal tools: invoice status, subscription, MFA draft, escalation, human approval."""
+from app.db import (
+    get_account,
+    get_connection,
+    get_invoice,
+    get_subscription,
+    get_ticket,
+)
+from app.guardrails import require_escalation
+from app.helpers import normalize_account_id, normalize_invoice_id, normalize_ticket_id
+
+
+def check_invoice_status(invoice_id: str, allowed: set[str] | None = None) -> dict:
+    """Look up invoice by ID. Returns status and details."""
+    if allowed is not None and "check_invoice_status" not in allowed:
+        return {"error": "Not authorized to check invoice status"}
+    inv_id = normalize_invoice_id(invoice_id)
+    conn = get_connection()
+    try:
+        row = get_invoice(conn, inv_id)
+        if not row:
+            return {"error": "Invoice not found", "invoice_id": inv_id}
+        return {
+            "id": row["id"],
+            "account_id": row["account_id"],
+            "amount_cents": row["amount_cents"],
+            "status": row["status"],
+            "note": row.get("note"),
+        }
+    finally:
+        conn.close()
+
+
+def inspect_subscription(account_id: str, allowed: set[str] | None = None) -> dict:
+    """Look up subscription/plan for an account."""
+    if allowed is not None and "inspect_subscription" not in allowed:
+        return {"error": "Not authorized to inspect subscription"}
+    aid = normalize_account_id(account_id)
+    conn = get_connection()
+    try:
+        acc = get_account(conn, aid)
+        if not acc:
+            return {"error": "Account not found", "account_id": aid}
+        sub = get_subscription(conn, aid)
+        if not sub:
+            return {"error": "No subscription found", "account_id": aid}
+        return {"account_id": aid, "plan": sub["plan"], "status": sub["status"], "tier": acc["tier"]}
+    finally:
+        conn.close()
+
+
+def draft_mfa_reset_request(account_id: str, user_id: str | None = None, allowed: set[str] | None = None) -> dict:
+    """Draft an MFA reset request (requires human approval). Does not execute reset."""
+    if allowed is not None and "draft_mfa_reset_request" not in allowed:
+        return {"error": "Not authorized to draft MFA reset"}
+    aid = normalize_account_id(account_id)
+    if require_escalation(aid, "draft_mfa_reset_request"):
+        return {
+            "status": "requires_approval",
+            "message": "Enterprise account: MFA reset must be approved. Use request_human_approval.",
+            "account_id": aid,
+        }
+    return {
+        "status": "draft",
+        "message": "MFA reset request drafted for approval.",
+        "account_id": aid,
+        "user_id": user_id or "admin",
+    }
+
+
+def escalate_ticket(ticket_id: str, allowed: set[str] | None = None) -> dict:
+    """Escalate a ticket to tier-2."""
+    if allowed is not None and "escalate_ticket" not in allowed:
+        return {"error": "Not authorized to escalate"}
+    tid = normalize_ticket_id(ticket_id)
+    conn = get_connection()
+    try:
+        ticket = get_ticket(conn, tid)
+        if not ticket:
+            return {"error": "Ticket not found", "ticket_id": tid}
+        return {"status": "escalated", "ticket_id": tid, "subject": ticket["subject"]}
+    finally:
+        conn.close()
+
+
+def request_human_approval(action: str, reason: str, allowed: set[str] | None = None) -> dict:
+    """Request human approval for a sensitive action."""
+    if allowed is not None and "request_human_approval" not in allowed:
+        return {"error": "Not authorized to request approval"}
+    return {"status": "pending_approval", "action": action, "reason": reason}
+
+
+# Registry for the agent to resolve names to callables
+TOOL_REGISTRY = {
+    "check_invoice_status": check_invoice_status,
+    "inspect_subscription": inspect_subscription,
+    "draft_mfa_reset_request": draft_mfa_reset_request,
+    "escalate_ticket": escalate_ticket,
+    "request_human_approval": request_human_approval,
+}

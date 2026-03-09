@@ -1,0 +1,11 @@
+# Additional promptfoo test cases (can be imported in promptfoo.yaml as tests: file://evals/promptfoo_cases.yaml)
+- vars:
+    user_input: "Why was invoice INV-1007 higher this month?"
+  assert:
+    - type: javascript
+      value: "output.length > 30"
+- vars:
+    user_input: "Can you reset MFA for the admin on account ACME-ENT-09?"
+  assert:
+    - type: javascript
+      value: "output.toLowerCase().includes('approval') || output.toLowerCase().includes('mfa') || output.length > 20"

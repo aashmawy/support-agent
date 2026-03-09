@@ -1,0 +1,27 @@
+[
+  {
+    "id": "traj-invoice",
+    "input": "Why was invoice INV-1007 higher this month?",
+    "expected_tool_sequence": [
+      "check_invoice_status"
+    ],
+    "scenario": "invoice_lookup"
+  },
+  {
+    "id": "traj-mfa",
+    "input": "Can you reset MFA for the admin on account ACME-ENT-09?",
+    "expected_tool_sequence": [
+      "draft_mfa_reset_request",
+      "request_human_approval"
+    ],
+    "scenario": "mfa_reset_requires_approval"
+  },
+  {
+    "id": "traj-escalation",
+    "input": "Please escalate ticket TICK-2041",
+    "expected_tool_sequence": [
+      "escalate_ticket"
+    ],
+    "scenario": "escalation"
+  }
+]

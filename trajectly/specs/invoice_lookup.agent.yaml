@@ -1,0 +1,13 @@
+# Trajectly spec: invoice lookup golden trajectory.
+# Run: python -m trajectly run trajectly/specs/invoice_lookup.agent.yaml --project-root .
+name: invoice_lookup
+description: User asks why invoice INV-1007 was higher; expected path includes check_invoice_status.
+instructions: |
+  You are a B2B SaaS support agent. Use tools to look up invoice status when the user asks about a specific invoice.
+input: "Why was invoice INV-1007 higher this month?"
+contract:
+  allowed_tools:
+    - check_invoice_status
+  denied_tools: []
+expected_tool_sequence:
+  - check_invoice_status

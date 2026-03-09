@@ -1,0 +1,10 @@
+# Golden scenario: invoice lookup
+# Human-readable definition; Trajectly runs trajectly/specs/invoice_lookup.agent.yaml
+id: traj-invoice
+input: "Why was invoice INV-1007 higher this month?"
+expected_tool_sequence:
+  - check_invoice_status
+scenario: invoice_lookup
+contract:
+  allow: [check_invoice_status]
+  deny: []

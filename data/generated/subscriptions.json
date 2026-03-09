@@ -1,0 +1,22 @@
+[
+  {
+    "account_id": "ACME-001",
+    "plan": "Pro Monthly",
+    "status": "active"
+  },
+  {
+    "account_id": "ACME-ENT-09",
+    "plan": "Enterprise Annual",
+    "status": "active"
+  },
+  {
+    "account_id": "BETA-002",
+    "plan": "Starter",
+    "status": "active"
+  },
+  {
+    "account_id": "GAMMA-003",
+    "plan": "Pro Annual",
+    "status": "active"
+  }
+]

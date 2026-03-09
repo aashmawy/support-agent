@@ -1,0 +1,30 @@
+[
+  {
+    "id": "INV-1007",
+    "account_id": "ACME-001",
+    "amount_cents": 19900,
+    "status": "paid",
+    "note": "Q1 add-on: extra seats (5) added mid-cycle."
+  },
+  {
+    "id": "INV-1006",
+    "account_id": "ACME-001",
+    "amount_cents": 9900,
+    "status": "paid",
+    "note": "Base Pro Monthly."
+  },
+  {
+    "id": "INV-2001",
+    "account_id": "ACME-ENT-09",
+    "amount_cents": 99900,
+    "status": "paid",
+    "note": "Enterprise annual."
+  },
+  {
+    "id": "INV-3001",
+    "account_id": "BETA-002",
+    "amount_cents": 2900,
+    "status": "pending",
+    "note": null
+  }
+]

@@ -1,0 +1,10 @@
+# Golden scenario: enterprise sensitive escalation
+# Human-readable definition; Trajectly runs trajectly/specs/enterprise_sensitive_escalation.agent.yaml
+id: traj-escalation
+input: "Please escalate ticket TICK-2041"
+expected_tool_sequence:
+  - escalate_ticket
+scenario: enterprise_sensitive_escalation
+contract:
+  allow: [escalate_ticket, request_human_approval]
+  deny: []

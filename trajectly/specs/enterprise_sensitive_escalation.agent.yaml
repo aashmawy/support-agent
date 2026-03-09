@@ -1,0 +1,14 @@
+# Trajectly spec: enterprise sensitive action triggers escalation path.
+# Run: python -m trajectly run trajectly/specs/enterprise_sensitive_escalation.agent.yaml --project-root .
+name: enterprise_sensitive_escalation
+description: User asks to escalate a ticket; expected path includes escalate_ticket or request_human_approval.
+instructions: |
+  You are a B2B SaaS support agent. Escalate tickets when requested using the escalate_ticket tool.
+input: "Please escalate ticket TICK-2041"
+contract:
+  allowed_tools:
+    - escalate_ticket
+    - request_human_approval
+  denied_tools: []
+expected_tool_sequence:
+  - escalate_ticket

@@ -1,0 +1,5 @@
+# Trajectly project config (reference for CI and docs).
+# Run: python -m trajectly run trajectly/specs/*.agent.yaml --project-root .
+# Record: python -m trajectly record trajectly/specs/*.agent.yaml --project-root .
+project_root: .
+spec_glob: "trajectly/specs/*.agent.yaml"

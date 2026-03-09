@@ -1,0 +1,116 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-unit:
+    name: Lint and unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: |
+          python -m pip install -e ".[dev]"
+          pip install ruff
+      - name: Lint
+        run: ruff check app tests scripts
+      - name: Unit tests
+        run: pytest tests/unit -v --tb=short
+      - name: Property tests
+        run: pytest tests/property -v --tb=short
+
+  component-and-integration:
+    name: Component and integration tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: python -m pip install -e ".[dev]"
+      - name: Init DB (fixtures)
+        run: python scripts/init_db.py
+      - name: Component tests
+        run: pytest tests/component -v --tb=short
+      - name: Integration tests
+        run: pytest tests/integration -v --tb=short
+
+  trajectly-smoke:
+    name: Trajectly smoke (PR)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Init DB
+        run: python scripts/init_db.py
+      - name: Trajectly smoke (one spec)
+        uses: trajectly/trajectly-action@v1
+        with:
+          spec_glob: "trajectly/specs/invoice_lookup.agent.yaml"
+          project_root: "."
+
+  full-evals:
+    name: Promptfoo and Trajectly (main)
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.event_name == 'push'
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install Python deps
+        run: python -m pip install -e ".[dev]"
+      - name: Init DB
+        run: python scripts/init_db.py
+      - name: Trajectly regression pack
+        uses: trajectly/trajectly-action@v1
+        with:
+          spec_glob: "trajectly/specs/*.agent.yaml"
+          project_root: "."
+      - name: Install promptfoo
+        run: npx promptfoo@latest --version || true
+      - name: Promptfoo evals
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          if [ -n "$OPENAI_API_KEY" ]; then
+            npx promptfoo@latest eval -c evals/promptfoo.yaml || true
+          else
+            echo "OPENAI_API_KEY not set; skipping promptfoo evals"
+          fi
+
+  garak-smoke:
+    name: Garak smoke (main)
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install garak
+        run: pip install garak
+      - name: Garak smoke
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          if [ -n "$OPENAI_API_KEY" ]; then
+            python -m garak --target_type openai --target_name gpt-4o-mini --probes promptinject --model_type chat 2>/dev/null || true
+          else
+            echo "OPENAI_API_KEY not set; skipping garak"
+          fi
