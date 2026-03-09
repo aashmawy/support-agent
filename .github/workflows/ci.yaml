@@ -68,7 +68,7 @@ jobs:
   full-evals:
     name: Promptfoo and Trajectly (main)
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && ${{ secrets.OPENAI_API_KEY != '' }}
+    if: ${{ github.ref == 'refs/heads/main' && secrets.OPENAI_API_KEY != '' }}
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
@@ -95,7 +95,7 @@ jobs:
   garak-smoke:
     name: Garak smoke (main)
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && ${{ secrets.OPENAI_API_KEY != '' }}
+    if: ${{ github.ref == 'refs/heads/main' && secrets.OPENAI_API_KEY != '' }}
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
