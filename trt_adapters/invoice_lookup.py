@@ -12,52 +12,40 @@ from app.tools import check_invoice_status
 DEFAULT_MODEL = "gpt-4o-mini"
 
 
-def _should_use_openai() -> bool:
-    return bool(os.environ.get("OPENAI_API_KEY"))
+def _llm_respond(invoice_data: dict) -> str:
+    from openai import OpenAI
 
-
-def _llm_respond(invoice_data: dict, *, use_openai: bool) -> str:
     prompt = (
         "You are a B2B SaaS support agent. The user asked: "
         "'Why was invoice INV-1007 higher this month?' "
         f"Here is the invoice data: {invoice_data}. "
         "Give a concise, helpful answer."
     )
-    if use_openai:
-        from openai import OpenAI
-
-        client = OpenAI()
-        resp = client.chat.completions.create(
-            model=DEFAULT_MODEL,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0,
-        )
-        return resp.choices[0].message.content or ""
-    return f"Invoice INV-1007: amount={invoice_data.get('amount_cents')} status={invoice_data.get('status')}"
+    client = OpenAI()
+    resp = client.chat.completions.create(
+        model=DEFAULT_MODEL,
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0,
+    )
+    return resp.choices[0].message.content or ""
 
 
-def build_app(*, use_openai: bool | None = None) -> trajectly.App:
-    if use_openai is None:
-        use_openai = _should_use_openai()
-
-    provider = "openai" if use_openai else "mock-openai"
-    model = DEFAULT_MODEL if use_openai else "mock-support-v1"
-
+def build_app() -> trajectly.App:
     app = trajectly.App(name="support-agent-invoice-lookup")
 
     @app.node(id="check_invoice_status", type="tool")
-    def check_invoice_node(invoice_id: str = "INV-1007") -> dict:
+    def check_invoice_node(invoice_id: str) -> dict:
         return check_invoice_status(invoice_id)
 
     @app.node(
         id="respond",
         type="llm",
         depends_on={"invoice_data": "check_invoice_status"},
-        provider=provider,
-        model=model,
+        provider="openai",
+        model=DEFAULT_MODEL,
     )
     def respond_node(invoice_data: dict) -> str:
-        return _llm_respond(invoice_data, use_openai=use_openai)
+        return _llm_respond(invoice_data)
 
     return app
 
@@ -66,7 +54,7 @@ def main() -> None:
     from scripts.init_db import main as init_db
     init_db()
     app = build_app()
-    app.run()
+    app.run(input_data={"invoice_id": "INV-1007"})
 
 
 if __name__ == "__main__":

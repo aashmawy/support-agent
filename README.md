@@ -132,8 +132,8 @@ python -m app.main --query "Please escalate ticket TICK-2041"
 | **All pytest** | `make test` | All of the above |
 | **Promptfoo** | `make eval-promptfoo` | Scenario evals: refusal, groundedness, escalation |
 | **Garak** | `make eval-garak` | Adversarial/safety probes |
-| **Trajectly record** | `make trajectly-record` | Record golden baselines (needs API key) |
-| **Trajectly run** | `make trajectly-run` | Trajectory regression against baselines |
+| **Trajectly run** | `make trajectly-run` | Contract checks against committed baselines (no API key) |
+| **Trajectly record** | `make trajectly-record` | Re-record baselines after intentional changes (needs API key) |
 | **Lint** | `make lint` | Ruff checks on app, tests, scripts |
 
 ## CI pipeline
@@ -142,13 +142,13 @@ See `.github/workflows/ci.yaml`. Two tiers:
 
 **Always run (no API key needed, blocking):**
 - Lint, unit tests, property tests, component tests, integration tests
+- Trajectly contract checks (uses committed baselines with fixture replay)
 
 **Only when `OPENAI_API_KEY` secret is configured (informational):**
-- Trajectly smoke (one spec via `trajectly/trajectly-action`)
 - Promptfoo evals (main branch)
 - Garak smoke (main branch)
 
-To enable the API-dependent jobs in your fork: go to **Settings > Secrets and variables > Actions**, add a secret named `OPENAI_API_KEY` with your key. Jobs are silently skipped when the secret is not set.
+Trajectly runs without an API key because it replays recorded fixtures from the committed baselines in `.trajectly/baselines/`. To enable the remaining API-dependent jobs in your fork: go to **Settings > Secrets and variables > Actions**, add a secret named `OPENAI_API_KEY` with your key. Jobs are silently skipped when the secret is not set.
 
 ## Testing pyramid
 
@@ -158,7 +158,7 @@ To enable the API-dependent jobs in your fork: go to **Settings > Secrets and va
 | Property (Hypothesis) | Invariants, normalization, sanitization, PII completeness | Concrete scenarios | PR + release |
 | Component (pytest + mocks) | Orchestrator branches, tool selection | Full stack, real model | PR |
 | Integration (pytest) | E2E flows, refusal/escalation paths | Non-deterministic LLM output | PR + release |
-| Trajectly | Behavioral contracts: arg validation, PII leak detection, side-effect enforcement, sequence + at_most_once + eventually constraints | Semantic quality, safety | PR (smoke), main (full) |
+| Trajectly | Behavioral contracts: arg validation, PII leak detection, side-effect enforcement, sequence + at_most_once + eventually constraints | Semantic quality, safety | PR + release (deterministic via fixture replay) |
 | Promptfoo | Scenario quality, refusal, groundedness | Execution path, determinism | Main + release |
 | Garak | Adversarial/safety (injection, override) | Business logic, trajectory | Main (smoke) |
 

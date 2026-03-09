@@ -19,4 +19,4 @@ contracts:
           regex: "^TICK-\\d+$"
   sequence:
     require: [tool:escalate_ticket]
-    eventually: [log_audit_event]
+    eventually: [tool:log_audit_event]

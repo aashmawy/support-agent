@@ -6,7 +6,10 @@ __pycache__/
 .venv/
 venv/
 data/support.db
-.trajectly/
+.trajectly/reports/
+.trajectly/repros/
+.trajectly/current/*.run.jsonl
+.trajectly/tmp/
 promptfoo/outputs/
 .hypothesis/
 *.egg-info/

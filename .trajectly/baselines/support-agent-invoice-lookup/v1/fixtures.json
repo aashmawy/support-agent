@@ -1,0 +1,50 @@
+{
+  "entries": [
+    {
+      "error": null,
+      "input_hash": "cee227002544de81a86704e0ae95aa834e6e5cdc1c315012c5207eb12771e212",
+      "input_payload": {
+        "args": [],
+        "kwargs": {
+          "invoice_id": "INV-1007"
+        }
+      },
+      "kind": "tool",
+      "name": "check_invoice_status",
+      "output_payload": {
+        "error": null,
+        "output": {
+          "account_id": "ACME-001",
+          "amount_cents": 19900,
+          "id": "INV-1007",
+          "note": "Q1 add-on: extra seats (5) added mid-cycle.",
+          "status": "paid"
+        }
+      }
+    },
+    {
+      "error": null,
+      "input_hash": "2859a9dcc794e6e58427943b654ca9cbf149a91a454d6e175024abc3ae32f467",
+      "input_payload": {
+        "args": [],
+        "kwargs": {
+          "invoice_data": {
+            "account_id": "ACME-001",
+            "amount_cents": 19900,
+            "id": "INV-1007",
+            "note": "Q1 add-on: extra seats (5) added mid-cycle.",
+            "status": "paid"
+          }
+        }
+      },
+      "kind": "llm",
+      "name": "openai:gpt-4o-mini",
+      "output_payload": {
+        "error": null,
+        "response": "The invoice INV-1007 was higher this month because it includes a charge for an add-on of 5 extra seats that were added mid-cycle for Q1. This additional cost contributed to the increased amount. If you have any further questions or need more details, feel free to ask!",
+        "result": "The invoice INV-1007 was higher this month because it includes a charge for an add-on of 5 extra seats that were added mid-cycle for Q1. This additional cost contributed to the increased amount. If you have any further questions or need more details, feel free to ask!",
+        "usage": {}
+      }
+    }
+  ]
+}

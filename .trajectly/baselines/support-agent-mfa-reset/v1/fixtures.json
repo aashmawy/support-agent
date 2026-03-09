@@ -1,0 +1,110 @@
+{
+  "entries": [
+    {
+      "error": null,
+      "input_hash": "7f261aba8818c9ecd3090a641ea5c16e36276dab4d2242e87fefd8d56eab9e06",
+      "input_payload": {
+        "args": [],
+        "kwargs": {
+          "account_id": "ACME-ENT-09",
+          "user_id": "admin"
+        }
+      },
+      "kind": "tool",
+      "name": "draft_mfa_reset_request",
+      "output_payload": {
+        "error": null,
+        "output": {
+          "account_id": "ACME-ENT-09",
+          "contact": "[EMAIL REDACTED]",
+          "message": "Enterprise account: MFA reset must be approved. Use request_human_approval.",
+          "status": "requires_approval"
+        }
+      }
+    },
+    {
+      "error": null,
+      "input_hash": "660754a7a213a0931cd9a7919fca52d24dd549732fd27c6460d369e49307feae",
+      "input_payload": {
+        "args": [],
+        "kwargs": {
+          "draft_result": {
+            "account_id": "ACME-ENT-09",
+            "contact": "[EMAIL REDACTED]",
+            "message": "Enterprise account: MFA reset must be approved. Use request_human_approval.",
+            "status": "requires_approval"
+          }
+        }
+      },
+      "kind": "tool",
+      "name": "request_human_approval",
+      "output_payload": {
+        "error": null,
+        "output": {
+          "action": "mfa_reset",
+          "reason": "MFA reset for ACME-ENT-09",
+          "status": "pending_approval"
+        }
+      }
+    },
+    {
+      "error": null,
+      "input_hash": "40a18d3cd2a9c66c45bd57ec344d59cbf524dc42eb723890d0d0306fca5a3900",
+      "input_payload": {
+        "args": [],
+        "kwargs": {
+          "approval_result": {
+            "action": "mfa_reset",
+            "reason": "MFA reset for ACME-ENT-09",
+            "status": "pending_approval"
+          }
+        }
+      },
+      "kind": "tool",
+      "name": "log_audit_event",
+      "output_payload": {
+        "error": null,
+        "output": {
+          "account_id": "ACME-ENT-09",
+          "audit_id": 8,
+          "event_type": "mfa_reset",
+          "status": "logged"
+        }
+      }
+    },
+    {
+      "error": null,
+      "input_hash": "33d02b2ed8875fc48ffe6cc0a021dcda762d3774eebd02e388e03f502a4c1e7b",
+      "input_payload": {
+        "args": [],
+        "kwargs": {
+          "approval_result": {
+            "action": "mfa_reset",
+            "reason": "MFA reset for ACME-ENT-09",
+            "status": "pending_approval"
+          },
+          "audit_result": {
+            "account_id": "ACME-ENT-09",
+            "audit_id": 8,
+            "event_type": "mfa_reset",
+            "status": "logged"
+          },
+          "draft_result": {
+            "account_id": "ACME-ENT-09",
+            "contact": "[EMAIL REDACTED]",
+            "message": "Enterprise account: MFA reset must be approved. Use request_human_approval.",
+            "status": "requires_approval"
+          }
+        }
+      },
+      "kind": "llm",
+      "name": "openai:gpt-4o-mini",
+      "output_payload": {
+        "error": null,
+        "response": "Your request to reset the Multi-Factor Authentication (MFA) for the admin on account ACME-ENT-09 has been submitted. Currently, it is pending human approval, as MFA resets for enterprise accounts require additional verification. An audit event has also been logged for this action. We will keep you updated on the status of the approval. If you have any further questions, feel free to ask!",
+        "result": "Your request to reset the Multi-Factor Authentication (MFA) for the admin on account ACME-ENT-09 has been submitted. Currently, it is pending human approval, as MFA resets for enterprise accounts require additional verification. An audit event has also been logged for this action. We will keep you updated on the status of the approval. If you have any further questions, feel free to ask!",
+        "usage": {}
+      }
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "metadata": {
+    "legacy_event_schema_version": "v1",
+    "spec_schema_version": "0.4"
+  },
+  "mode": "record",
+  "normalizer_version": "1",
+  "run_id": "support-agent-invoice-lookup-52a01774",
+  "schema_version": "0.4",
+  "spec_name": "support-agent-invoice-lookup"
+}
