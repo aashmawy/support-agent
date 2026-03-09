@@ -116,17 +116,17 @@ python -m app.main --query "Please escalate ticket TICK-2041"
 
 ## CI pipeline
 
-See `.github/workflows/ci.yaml`. Staged strategy:
+See `.github/workflows/ci.yaml`. Two tiers:
 
-**Pull requests (blocking):**
+**Always run (no API key needed, blocking):**
 - Lint, unit tests, property tests, component tests, integration tests
-- Trajectly smoke (one spec via `trajectly/trajectly-action`)
 
-**Main branch (blocking + informational):**
-- Full pytest suite
-- Trajectly full regression pack (via `trajectly/trajectly-action`)
-- Promptfoo evals (requires `OPENAI_API_KEY` secret)
-- Garak smoke (requires `OPENAI_API_KEY` secret)
+**Only when `OPENAI_API_KEY` secret is configured (informational):**
+- Trajectly smoke (one spec via `trajectly/trajectly-action`)
+- Promptfoo evals (main branch)
+- Garak smoke (main branch)
+
+To enable the API-dependent jobs in your fork: go to **Settings > Secrets and variables > Actions**, add a secret named `OPENAI_API_KEY` with your key. Jobs are silently skipped when the secret is not set.
 
 ## Testing pyramid
 

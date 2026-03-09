@@ -1,9 +1,13 @@
 name: CI
 
 on:
-  workflow_dispatch:  # manual trigger only; this file serves as a CI reference for users who fork the repo
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
+  # ── Deterministic (no API key needed) ──────────────────────────────
   lint-and-unit:
     name: Lint and unit tests
     runs-on: ubuntu-latest
@@ -40,15 +44,19 @@ jobs:
       - name: Integration tests
         run: pytest tests/integration -v --tb=short
 
+  # ── API-dependent (only run when OPENAI_API_KEY secret is set) ─────
   trajectly-smoke:
-    name: Trajectly smoke (PR)
+    name: Trajectly smoke
     runs-on: ubuntu-latest
-    continue-on-error: true  # requires recorded baselines; run make trajectly-record locally first
+    if: ${{ secrets.OPENAI_API_KEY != '' }}
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Install deps
+        run: python -m pip install -e ".[dev]"
       - name: Init DB
         run: python scripts/init_db.py
       - name: Trajectly smoke (one spec)
@@ -60,7 +68,7 @@ jobs:
   full-evals:
     name: Promptfoo and Trajectly (main)
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && ${{ secrets.OPENAI_API_KEY != '' }}
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
@@ -79,22 +87,15 @@ jobs:
         with:
           spec_glob: "trajectly/specs/*.agent.yaml"
           project_root: "."
-      - name: Install promptfoo
-        run: npx promptfoo@latest --version || true
       - name: Promptfoo evals
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: |
-          if [ -n "$OPENAI_API_KEY" ]; then
-            npx promptfoo@latest eval -c evals/promptfoo.yaml || true
-          else
-            echo "OPENAI_API_KEY not set; skipping promptfoo evals"
-          fi
+        run: npx promptfoo@latest eval -c evals/promptfoo.yaml
 
   garak-smoke:
     name: Garak smoke (main)
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && ${{ secrets.OPENAI_API_KEY != '' }}
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
@@ -106,9 +107,4 @@ jobs:
       - name: Garak smoke
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: |
-          if [ -n "$OPENAI_API_KEY" ]; then
-            python -m garak --target_type openai --target_name gpt-4o-mini --probes promptinject --model_type chat 2>/dev/null || true
-          else
-            echo "OPENAI_API_KEY not set; skipping garak"
-          fi
+        run: python -m garak --target_type openai --target_name gpt-4o-mini --probes promptinject --model_type chat
