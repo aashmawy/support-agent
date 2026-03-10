@@ -166,4 +166,6 @@ Trajectly runs without an API key because it replays recorded fixtures from the 
 
 ## Deep dive
 
-For a detailed walkthrough of the testing strategy and the rationale behind each layer, see the [companion blog article](https://dev.to/aashmawy/how-i-test-an-ai-support-agent-a-practical-testing-pyramid-3iik).
+For a detailed walkthrough of the testing strategy and the rationale behind each layer, see the blong on either:
+- Dev.to : https://dev.to/aashmawy/how-i-test-an-ai-support-agent-a-practical-testing-pyramid-3iik
+- Medium: https://medium.com/@awashmawy/how-i-test-an-ai-support-agent-a-practical-testing-pyramid-b93807eb6f1d
