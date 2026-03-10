@@ -66,7 +66,7 @@
         "error": null,
         "output": {
           "account_id": "ACME-ENT-09",
-          "audit_id": 4,
+          "audit_id": 2,
           "event_type": "mfa_reset",
           "status": "logged"
         }
@@ -74,7 +74,7 @@
     },
     {
       "error": null,
-      "input_hash": "ce3069f8312a2bc8719034af9bb7fdc15f6a9ed4c8284cad352ad9088d426ccb",
+      "input_hash": "0a003c1525216d396ddd17e9b2cc03fd350cd8f19874acbdd4cabfdc418c3321",
       "input_payload": {
         "args": [],
         "kwargs": {
@@ -85,7 +85,7 @@
           },
           "audit_result": {
             "account_id": "ACME-ENT-09",
-            "audit_id": 4,
+            "audit_id": 2,
             "event_type": "mfa_reset",
             "status": "logged"
           },

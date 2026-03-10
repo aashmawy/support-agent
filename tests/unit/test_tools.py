@@ -121,6 +121,7 @@ class TestEscalateTicket:
         result = escalate_ticket("TICK-2041")
         assert result["status"] == "escalated"
         assert result["ticket_id"] == "TICK-2041"
+        assert result["account_id"] == "ACME-001"
 
     def test_missing_ticket(self, tool_db):
         from app.tools import escalate_ticket

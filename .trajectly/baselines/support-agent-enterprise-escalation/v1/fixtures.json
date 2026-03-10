@@ -14,6 +14,7 @@
       "output_payload": {
         "error": null,
         "output": {
+          "account_id": "ACME-001",
           "status": "escalated",
           "subject": "Billing discrepancy",
           "ticket_id": "TICK-2041"
@@ -22,11 +23,12 @@
     },
     {
       "error": null,
-      "input_hash": "150c9a7c83ccaa00c0cbcdd4e2e18f9539abc402152e5433ba3ee389dd0dd76b",
+      "input_hash": "3bf54dc8e1b1791263360b60cc3fe5d36fd6e84b5afa61a859a7cc364cc42b8e",
       "input_payload": {
         "args": [],
         "kwargs": {
           "escalation_result": {
+            "account_id": "ACME-001",
             "status": "escalated",
             "subject": "Billing discrepancy",
             "ticket_id": "TICK-2041"
@@ -38,8 +40,8 @@
       "output_payload": {
         "error": null,
         "output": {
-          "account_id": "TICK-2041",
-          "audit_id": 3,
+          "account_id": "ACME-001",
+          "audit_id": 1,
           "event_type": "escalation",
           "status": "logged"
         }
@@ -47,17 +49,18 @@
     },
     {
       "error": null,
-      "input_hash": "3631e6bffb1b4afdd581977068d716e4595978713847fb7034ff5a28d5ac780c",
+      "input_hash": "de9e4f1b1c45cd275e5ae3470aa5a073637404aa1ad0795864e11ebc0b4dc4f7",
       "input_payload": {
         "args": [],
         "kwargs": {
           "audit_result": {
-            "account_id": "TICK-2041",
-            "audit_id": 3,
+            "account_id": "ACME-001",
+            "audit_id": 1,
             "event_type": "escalation",
             "status": "logged"
           },
           "escalation_result": {
+            "account_id": "ACME-001",
             "status": "escalated",
             "subject": "Billing discrepancy",
             "ticket_id": "TICK-2041"
@@ -68,8 +71,8 @@
       "name": "openai:gpt-4o-mini",
       "output_payload": {
         "error": null,
-        "response": "Your ticket TICK-2041 regarding the billing discrepancy has been successfully escalated. The current status is escalated, and we have logged the escalation in our audit system. If you have any further questions or need additional assistance, please let us know!",
-        "result": "Your ticket TICK-2041 regarding the billing discrepancy has been successfully escalated. The current status is escalated, and we have logged the escalation in our audit system. If you have any further questions or need additional assistance, please let us know!",
+        "response": "Your ticket TICK-2041 regarding the billing discrepancy has been successfully escalated. The escalation status is confirmed, and it is now being prioritized for further review. If you have any additional questions or need further assistance, feel free to reach out!",
+        "result": "Your ticket TICK-2041 regarding the billing discrepancy has been successfully escalated. The escalation status is confirmed, and it is now being prioritized for further review. If you have any additional questions or need further assistance, feel free to reach out!",
         "usage": {}
       }
     }

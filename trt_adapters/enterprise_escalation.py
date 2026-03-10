@@ -44,7 +44,7 @@ def build_app() -> trajectly.App:
     def audit_node(escalation_result: dict) -> dict:
         return log_audit_event(
             event_type="escalation",
-            account_id=escalation_result.get("ticket_id", "TICK-2041"),
+            account_id=escalation_result.get("account_id", "unknown"),
             details=f"Ticket escalated: {escalation_result.get('subject', '')}",
         )
 

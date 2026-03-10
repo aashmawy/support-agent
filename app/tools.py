@@ -91,7 +91,7 @@ def escalate_ticket(ticket_id: str, allowed: set[str] | None = None) -> dict:
         ticket = get_ticket(conn, tid)
         if not ticket:
             return {"error": "Ticket not found", "ticket_id": tid}
-        return {"status": "escalated", "ticket_id": tid, "subject": ticket["subject"]}
+        return {"status": "escalated", "ticket_id": tid, "account_id": ticket["account_id"], "subject": ticket["subject"]}
     finally:
         conn.close()
 
