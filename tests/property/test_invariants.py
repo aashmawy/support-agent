@@ -1,5 +1,6 @@
 """Property-based tests with Hypothesis: normalization, auth consistency, sanitization, PII scrubbing."""
 from pathlib import Path
+import re
 
 from hypothesis import given
 from hypothesis import strategies as st
@@ -57,16 +58,17 @@ def test_normalize_ticket_id_idempotent(s: str):
     assert n1 == n2
 
 
+EMAIL_RE = re.compile(r"[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}")
 EMAIL_STRATEGY = st.from_regex(r"[a-z]{1,8}@[a-z]{1,6}\.[a-z]{2,4}", fullmatch=True)
 
 
 @given(st.tuples(st.text(min_size=0, max_size=30), EMAIL_STRATEGY, st.text(min_size=0, max_size=30)))
 def test_scrub_pii_removes_all_emails(parts):
-    """Any string containing an email address must have it scrubbed."""
+    """Any string containing an email address must have email patterns scrubbed."""
     prefix, email, suffix = parts
     text = prefix + email + suffix
     result = scrub_pii(text)
-    assert "@" not in result
+    assert EMAIL_RE.search(result) is None
     assert "[EMAIL REDACTED]" in result
 
 
