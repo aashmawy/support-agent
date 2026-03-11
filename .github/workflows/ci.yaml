@@ -116,8 +116,8 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install garak
-        run: pip install garak
+        run: python -m pip install garak
       - name: Garak smoke
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: python -m garak --model_type openai --model_name gpt-4o-mini --probes promptinject
+        run: make eval-garak

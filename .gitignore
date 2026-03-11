@@ -18,3 +18,4 @@ build/
 .pytest_cache/
 .coverage
 htmlcov/
+.xdg/

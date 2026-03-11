@@ -30,7 +30,17 @@ eval-promptfoo:
 	npx promptfoo@latest eval -c evals/promptfoo.yaml
 
 eval-garak:
-	python -m garak --model_type openai --model_name gpt-4o-mini --probes promptinject 2>/dev/null || echo "Run garak with OPENAI_API_KEY set; see README and blog."
+	@set -a; [ -f .env ] && . ./.env; set +a; \
+	XDG_CONFIG_HOME="$$PWD/.xdg/config" \
+	XDG_DATA_HOME="$$PWD/.xdg/data" \
+	XDG_CACHE_HOME="$$PWD/.xdg/cache" \
+	python -m garak --model_type openai --model_name gpt-4o-mini --probes promptinject || { \
+		status=$$?; \
+		if [ -z "$$OPENAI_API_KEY" ]; then \
+			echo "OPENAI_API_KEY is not set. Copy .env.example to .env or export it in your shell."; \
+		fi; \
+		exit $$status; \
+	}
 
 trajectly-record:
 	python -m trajectly record trajectly/specs/*.agent.yaml --project-root .
