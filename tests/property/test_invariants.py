@@ -1,6 +1,6 @@
 """Property-based tests with Hypothesis: normalization, auth consistency, sanitization, PII scrubbing."""
-from pathlib import Path
 import re
+from pathlib import Path
 
 from hypothesis import given
 from hypothesis import strategies as st
